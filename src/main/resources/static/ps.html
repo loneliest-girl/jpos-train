@@ -1,0 +1,147 @@
+<div style="font-size:12px">
+	<h3>状态</h3>
+	代缴处理中-&gt;代缴成功<br /> 代缴处理中-&gt;代缴失败-&gt;已退款
+
+	<h3>两个界面</h3>
+	<ol>
+		<li>代缴界面
+		<li>查询界面
+	</ol>
+
+	<h3>代缴界面</h3>
+	<ol>
+		<li>用户编号：支持密码键盘(PinPadField)，只能是10位数字，回车后查询该用户的代缴费用（可在右侧中输入并回车试试），未查询费用前不允许提交业务。</li>
+		<li>确认：进行收款并提交订单</li>
+		<li>查询：进入查询界面</li>
+	</ol>
+
+	<h3>查询界面</h3>
+	<ol>
+		<li>交易时间大于等于：默认为当天的00:00:00</li>
+		<li>代缴笔数：代缴处理中与代缴成功的笔数</li>
+		<li>代缴总额：代缴处理中与代缴成功的总额</li>
+		<li>待退款：代缴失败且未退款的总额</li>
+		<li>状态：代缴处理中、代缴成功、代缴失败、已退款</li>
+		<li>查询：按条件查询数据库记录</li>
+		<li>条件：焦点跳转到“流水号类似于”</li>
+		<li>退款：只有“代缴失败”且不是“已退款”的订单，才能进行退款操作</li>
+	</ol>
+
+	<h3>数据结构</h3>
+	<ol>
+		<li>实体包路径：com.hd123.jpos.csi.entity.polyservice</li>
+		<li>相关实体类：FftTran extends BasePolyTran(主单据), FftTranPayment(付款行),
+			FftTranState(单据状态)</li>
+		<li>实体管理者接口：com.hd123.jpos.csi.polyservice.IFftTranProcessor</li>
+		<li>实体管理者实现类：com.hd123.jpos.server.polyservice.FftTranProcessor</li>
+		<li>界面包路径：com.hd123.jpos.client.swing.polyservice.ffttran</li>
+		<li>相关界面类：FftTranListPanel(查询界面),
+			FftTranListPanelSettings(查询界面配置), FftTranPanel(代缴界面),
+			FftTranPanelSettings(代缴界面配置)</li>
+	</ol>
+	
+	<h3>FftTranProcessor功能要求</h3>
+	<ol>
+		<li>实现解款报表接口：IPolyReportSource</li>
+		<li>实现便民报表接口：IJKReportSource</li>
+		<li>实现数据清理接口：Purgable</li>
+	</ol>
+
+	<h3><a name="psi">PS接口文档说明</a></h3>
+	<div>接口包路径：com.hd123.polyservice.action.fft</div>
+	<div>接口名称：IViewFft，接口方法如下：</div>
+	<ol>
+		<li>代缴费用查询接口</li>
+		<div style="padding:5px;background-color:#157FCC;">
+			<div>PrepareResponse prepare(PrepareRequest request) throws
+				Exception;</div>
+			<div style="background-color:red;">PrepareRequest extends
+				PolyRequest</div>
+			<ol>
+				<li>String storeCode 门店号
+				<li>String posNo POS机号
+				<li>String macAddr MAC地址
+				<li>String account 用户编号
+				<li>Integer payType 付费项目: 1=燃气费 ；2=水费；2=电费</li>
+			</ol>
+			<div style="background-color:red;">PrepareResponse extends
+				PolyResponse</div>
+			<ol>
+				<li>BigDecimal amount 缴费金额
+				<li>BigDecimal fee 手续费
+			</ol>
+		</div>
+		<li>代缴提交接口</li>
+		<div style="padding:5px;background-color:#157FCC;">
+			<div>SubmitResponse submit(SubmitRequest request) throws
+				Exception;</div>
+			<div style="background-color:red;">SubmitRequest extends
+				PolyRequest</div>
+			<ol>
+				<li>String storeCode 门店号
+				<li>String posNo POS机号
+				<li>String macAddr MAC地址
+				<li>String uuid 单据唯一标识
+				<li>String storeOrderNum 流水号
+				<li>String account 用户编号
+				<li>Integer payType 付费项目: 1=燃气费 ；2=水费；2=电费</li>
+				<li>BigDecimal amount 缴费金额
+				<li>BigDecimal fee 手续费
+				<li>BigDecimal totalAmount 总金额
+			</ol>
+			<div style="background-color:red;">SubmitResponse extends
+				PolyResponse</div>
+		</div>
+		<li>代缴查询接口</li>
+		<div style="padding:5px;background-color:#157FCC;">
+			<div>QueryResponse query(QueryRequest request) throws
+				Exception;</div>
+			<div style="background-color:red;">QueryRequest extends
+				PolyRequest</div>
+			<ol>
+				<li>String storeCode 门店号
+				<li>String posNo POS机号
+				<li>String macAddr MAC地址
+				<li>String uuid 单据唯一标识
+				<li>String storeOrderNum 流水号
+			</ol>
+			<div style="background-color:red;">QueryResponse extends
+				PolyResponse</div>
+		</div>
+	</ol>
+	<h3>业务调用逻辑</h3>
+	<ol>
+		<li>店员进入付费通代缴界面，选择付费项目，输入用户编号回车后，JPOS调用PS的prepare接口进行费用查询：</li>
+		<ul>
+			<li>retCode=1，调用成功，界面显示代缴费用信息，NEXT</li>
+			<li>retCode=0或超时或异常，界面弹框提示，操作中断</li>
+		</ul>
+		<li>店员按[确认]提交订单，JPOS弹出对话框显示订单相关信息，确定后进行收款（默认现金，可通过BO配置支持多种付款方式），收款成功后JPOS调用PS的submit接口接交订单：</li>
+		<ul>
+			<li>retCode=1或超时或异常，保存交易状态为：代缴处理中，界面显示代缴成功，JPOS异步查询订单结果，交易结束，返回主菜单。</li>
+			<li>retCode=其他，提交失败，JPOS不保存交易，界面弹框提示错误信息retMessage，店员可重新提交订单</li>
+		</ul>
+		<li>JPOS异步调用PS的query接口，查询状态为“代缴处理中”的订单</li>
+		<ul>
+			<li>retCode=1，查询成功</li>
+			<ul>
+				<li>orderState=0，代缴失败，停止异步查询，店员可执行退款操作</li>
+				<li>orderState=1，代缴成功，停止异步查询，交易结束</li>
+				<li>orderState=2，代缴处理中，JPOS继续异步查询</li>
+			</ul>
+			<li>retCode=0或超时或异常，查询失败，JPOS继续异步查询</li>
+		</ul>
+		<li>顾客到门店要求店员对代缴失败进行退款，店员到查询界面选择订单进行退款操作</li>
+	</ol>
+	<h3>额外要求</h3>
+	<ol>
+		<li>输入用户编号后回车查询付费信息，查到付费信息后，再次修改用户编号而不回车，此时用户编号与付费信息是不一致的，如何保证一致呢？</li>
+	</ol>
+	<h3>编码说明</h3>
+	<ol>
+		<li>请新建JAVA工程jpos-ps，并参照<a href="http://hdwiki/wiki/pages/viewpage.action?pageId=165296792"  target="_blank">JPOS模块化开发流程</a>进行开发</li>
+		<li>本任务模拟了现场需求，所以请根据“<a href="#psi">PS接口文档说明</a>”自行添加PS接口类</li>
+		<li>在开发过程中，可以自己创建PS模拟服务或要求导师提供PS服务(http://bitest:8080/polyservice-emul)</li>
+		<li>要求支持屏幕分辩率为800*600，如果查询界面显示不全，请用SKIN配置字体大小</li>
+	</ol>
+</div>

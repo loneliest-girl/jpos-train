@@ -1,0 +1,61 @@
+<div style="font-size:12px">
+	<h3>状态</h3>
+	未发送-&gt;已发送-&gt;（系统拒绝）-&gt;已送达
+	
+	<h3>四个界面</h3>
+	<ol>
+		<li>订单新增
+		<li>订单修改
+		<li>订单查看
+		<li>订单列表
+	</ol>
+
+	<h3>列表</h3>
+	<ol>
+		<li>查询：要求采用对话框显示</li>
+		<li>要求支持表格列排序</li>
+	</ol>
+
+	<h3>新增/编辑</h3>
+	<ol>
+		<li>发生日期：只能小于等于当天，默认为当天，且必填</li>
+		<li>备注：选填</li>
+		<li>可编辑表格列: 商品代码, 数量. 每次修改后, 都重新计算金额</li>
+		<li>返回:显示进入此界面前的界面.</li>
+		<li>保存:保存单据，进入查看界面.</li>
+		<li>保存并发送:异步发送单据到BO，保存单据为“已发送”，进入查看界面.</li>
+	</ol>
+	
+	<h3>异步发送单据到BO</h3>
+	<ol>
+		<li>BO接收到数据后，存储在orderCache中，要求有避免重复上传机制</li>
+		<li>BO接收数据成功后，保存单据状态为“已送达”</li>
+	</ol>
+	
+	<h3>编辑/删除</h3>
+	<ol>
+		<li>只有“未发送”和“系统拒绝”才允许进行编辑/删除</li>
+		<li>删除单据后，返回列表界面</li>
+	</ol>
+	
+	<h3>商品录入</h3>
+	<ol>
+		<li>必须转为小包装商品</li>
+	</ol>
+
+	<h3>数据要求</h3>
+	<ol>
+		<li>实体包路径：com.hd123.jpos.csi.entity.commonorder</li>
+		<li>相关实体类：CommonOrder extends BaseOrder, CommonOrderLine, CommonOrderState</li>
+		<li>实体管理者接口：com.hd123.jpos.csi.ICommonOrderMgr</li>
+		<li>实体管理者实现类：com.hd123.jpos.server.CommonOrderMgr</li>
+		<li>界面包路径：com.hd123.jpos.client.swing.commonorder</li>
+		<li>相关界面类：CommonOrderListPanel, CommonOrderQueryDialog, CommonOrderViewPanel, CommonOrderEditPanel, CommonOrderCreatePanel</li>
+		<li>BO数据接收接口:IBoBillReceiveService.appendCommonOrder</li>
+		<li>BO数据接收实现类:com.hd123.jpos.bo4.impex.CommonOrderService4</li>
+	</ol>
+	<h3>编码说明</h3>
+	<ol>
+		<li>请新建JAVA工程jpos-order，并参照<a href="http://hdwiki/wiki/pages/viewpage.action?pageId=165296792" target="_blank">JPOS模块化开发流程</a>进行开发</li>
+	</ol>
+</div>
